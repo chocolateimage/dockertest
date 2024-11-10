@@ -18,7 +18,7 @@ services:
   jsapi:
     build:
       context: ./
-      target: dev-jsapi
+      target: jsapi-dev
     develop:
       watch:
         - path: ./jsapi/src
@@ -32,7 +32,7 @@ services:
   ui:
     build:
       context: ./
-      target: dev-ui
+      target: ui-dev
     develop:
       watch:
         - path: ./ui/src

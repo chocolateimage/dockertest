@@ -5,24 +5,26 @@ RUN corepack enable
 WORKDIR /app
 COPY pnpm-lock.yaml ./pnpm-lock.yaml
 COPY pnpm-workspace.yaml ./pnpm-workspace.yaml
-COPY ui/ ./ui
-COPY jsapi/ ./jsapi
 
 # DEPENDENCIES
 
-FROM base AS deps-prod
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
-
-FROM base AS deps-dev
+FROM base AS install
+COPY ui/ /app/ui
+COPY jsapi/ /app/jsapi
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+
+FROM install AS build
+RUN pnpm run -r build
+# Don't "pnpm deploy" ui because the command above already builds the dist required for nginx
+RUN pnpm deploy --filter=jsapi --prod /prod/jsapi
 
 # pnpm dev for subprojects
 
-FROM deps-dev AS dev-ui
+FROM install AS ui-dev
 WORKDIR /app/ui
 CMD [ "pnpm", "dev" ]
 
-FROM deps-dev AS dev-jsapi
+FROM install AS jsapi-dev
 WORKDIR /app/jsapi
 CMD [ "pnpm", "dev" ]
 
@@ -30,20 +32,15 @@ CMD [ "pnpm", "dev" ]
 
 ## UI
 
-FROM deps-dev AS build-ui
-WORKDIR /app/ui
-RUN pnpm run build
-
-FROM nginx AS prod-ui
-WORKDIR /app/ui
-COPY --from=build-ui /app/ui/dist /usr/share/nginx/html
+FROM nginx AS ui-prod
+COPY --from=build /app/ui/dist /usr/share/nginx/html
 RUN mkdir /etc/nginx/templates
 COPY ./ui/default.conf.template /etc/nginx/templates
 
 ## JS API
 
-FROM base AS prod-jsapi
-WORKDIR /app/jsapi
-COPY --from=deps-prod /app/node_modules /app/node_modules
-COPY --from=deps-prod /app/jsapi/node_modules /app/jsapi/node_modules
+FROM base AS jsapi-prod
+ENV NODE_ENV=production
+WORKDIR /app
+COPY --from=build /prod/jsapi /app
 CMD [ "pnpm", "run", "start" ]

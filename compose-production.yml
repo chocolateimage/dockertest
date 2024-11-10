@@ -1,10 +1,10 @@
 services:
   jsapi:
     build:
-      target: prod-jsapi
+      target: jsapi-prod
   ui:
     build:
-      target: prod-ui
+      target: ui-prod
   api:
     environment:
       - PROD=TRUE
