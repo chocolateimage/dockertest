@@ -1,0 +1,47 @@
+services:
+  api:
+    build: api
+    develop:
+      watch:
+        - path: ./api
+          action: sync
+          target: /app
+        - path: ./api/requirements.txt
+          action: rebuild
+    expose: # Expose is only internal inside docker
+      - 8081:8081
+    stop_signal: SIGINT
+  jsapi:
+    build:
+      context: ./
+      target: dev-jsapi
+    develop:
+      watch:
+        - path: ./jsapi/src
+          action: sync
+          target: /app/jsapi/src
+        - path: ./jsapi/package.json
+          action: rebuild
+          target: /app/jsapi/package.json
+    expose:
+      - 8082:8082
+  ui:
+    build:
+      context: ./
+      target: dev-ui
+    develop:
+      watch:
+        - path: ./ui/src
+          action: sync
+          target: /app/ui/src
+        - path: ./ui/public
+          action: sync
+          target: /app/ui/public
+        - path: ./ui/vite.config.js
+          action: sync
+          target: /app/ui/vite.config.js
+        - path: ./ui/package.json
+          action: rebuild
+          target: /app/ui/package.json
+    ports: # Ports is everywhere unlike expose
+      - 8080:8080
