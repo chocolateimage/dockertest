@@ -8,3 +8,6 @@ services:
   api:
     environment:
       - PROD=TRUE
+  adminer:
+    profiles:
+      - donotstart

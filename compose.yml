@@ -1,6 +1,8 @@
 services:
   api:
     build: api
+    env_file:
+      - .env
     develop:
       watch:
         - path: ./api
@@ -11,6 +13,8 @@ services:
     expose: # Expose is only internal inside docker
       - 8081:8081
     stop_signal: SIGINT
+    depends_on:
+      - db
   jsapi:
     build:
       context: ./
@@ -45,3 +49,24 @@ services:
           target: /app/ui/package.json
     ports: # Ports is everywhere unlike expose
       - 8080:8080
+    depends_on:
+      - api
+      - jsapi
+
+  db:
+    env_file:
+      - .env
+    image: postgres
+    restart: always
+    volumes:
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+      - pgdata:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8090:8080
+
+volumes:
+  pgdata:

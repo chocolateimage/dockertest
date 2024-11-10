@@ -21,3 +21,34 @@ code {
   padding: 2px 8px;
   border-radius: 2px;
 }
+
+input, textarea {
+  border: none;
+  background-color: #2c2c2c;
+  color: white;
+  outline: none;
+  padding: 2px 8px;
+}
+
+input:hover, textarea:hover, input:focus, textarea:focus {
+  background-color: #2e2e2e;
+}
+
+input, textarea, button {
+  font: inherit;
+  border-radius: 2px;
+}
+
+button {
+  border: none;
+  padding: 4px 8px;
+  cursor: pointer;
+  background-color: #438bdf;
+  color: white;
+  font-weight: bold;
+}
+
+button:disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
